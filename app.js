@@ -98,6 +98,11 @@ async function S(key, value) {
   }
 }
 
+// Hàm định dạng số
+function formatNumber(n) {
+    return Number(n).toLocaleString('vi-VN');
+}
+
 function log(m) {
   var l = L(AUDIT_KEY, []);
   l.unshift({ time: new Date().toISOString(), msg: m });
@@ -362,6 +367,13 @@ function adminMode() {
   var btn = document.getElementById('adminLoginBtn');
   if (btn) { btn.textContent = '🔓 Admin';
     btn.style.background = '#10b981'; }
+    if (typeof renderStatsTable === 'function') {
+        var records = L(REC_KEY, []);
+        renderStatsTable(records);
+    }
+    
+    var btn = document.getElementById('adminLoginBtn');
+    if (btn) { btn.textContent = '🔓 Admin'; btn.style.background = '#10b981'; }
 }
 
 function employeeMode() {
@@ -651,8 +663,11 @@ function renderSelectedEmployees() {
                 'ondragover="onDragOver(event)" ' +
                 'ondrop="onDrop(event)" ' +
                 'style="display:flex; align-items:center; gap:6px; padding:6px 10px; background:#f8fafc; border-radius:8px; margin-bottom:6px; border:1px solid #e5e7eb;">';
-        html += '<span style="flex:1;">' + cleanEmployeeName(empName) + '</span>';
-        html += '<span class="remove-tag" onclick="removeSelectedEmployee(\'' + empName.replace(/'/g, "\\'") + '\')">×</span>';
+        html += '<span style="flex:1; display:flex; align-items:center;">' + 
+        '<span style="display:inline-block; width:22px; height:22px; line-height:22px; text-align:center; background:#2563eb; color:white; border-radius:50%; font-size:11px; font-weight:600; margin-right:8px; flex-shrink:0;">' + (idx + 1) + '</span>' + 
+        cleanEmployeeName(empName) + 
+        '</span>';
+        html += '<span style="cursor:pointer;font-weight:700;color:#dc2626;font-size:14px;">✕</span>';
         html += '</div>';
     });
     
@@ -1569,7 +1584,22 @@ window.subAtt = async function(e, keepTimestamp) {
       emp.push({ id: 'e' + Date.now(), name: en });
       S(EMP_KEY, emp);
     }
-    rec.push({
+      // Kiểm tra nếu nhân viên được chọn nhiều hơn 1 công đoạn
+  var hasMultipleTasks = (ts || []).length > 1;
+  
+  if (hasMultipleTasks) {
+      var taskList = (ts || []).map(function(t) { return t.task; }).join(', ');
+      var confirmed = await showConfirm(
+          '⚠️ Bạn đang chọn ' + ts.length + ' công đoạn cho nhân viên:\n\n' + 
+          taskList + '\n\n' +
+          'Bạn có chắc chắn muốn lưu?', 
+          'Cảnh báo nhiều công đoạn'
+      );
+      
+      if (!confirmed) return false;
+  }
+  
+  rec.push({
       id: 'rec_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 4),
       employee: en,
       date: dt.split('T')[0],
@@ -2054,10 +2084,10 @@ function applyStatsFilters() {
 
   var cards = document.querySelectorAll('#subTabDashboard .stat-card-enhanced .stat-number');
   if (cards.length >= 4) {
-    cards[0].textContent = totalRecords;
-    cards[1].textContent = uniqueEmployees;
-    cards[2].textContent = eatCount + ' (' + (totalRecords ? Math.round(eatCount / totalRecords * 100) : 0) + '%)';
-    cards[3].innerHTML = totalHours + 'h <span style="font-size:11px;color:#64748b;">(~' + avgHoursPerDay + 'h/ngày)</span>';
+    cards[0].textContent = formatNumber(totalRecords);
+    cards[1].textContent = formatNumber(uniqueEmployees);
+    cards[2].textContent = formatNumber(eatCount) + ' (' + (totalRecords ? Math.round(eatCount / totalRecords * 100) : 0) + '%)';
+    cards[3].innerHTML = formatNumber(totalHours) + 'h <span style="font-size:11px;color:#64748b;">(~' + avgHoursPerDay + 'h/ngày)</span>';
   }
 
   var monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
@@ -2279,7 +2309,11 @@ function renderCurrentOverviewPage(container) {
     group.employees.forEach(function(empName) {
       employeeTags += '<span class="emp-tag">' + escHtml(cleanEmployeeName(empName)) + '</span> ';
     });
-    html += '<tr>' +
+    html += '<tr draggable="true" ' +
+      'ondragstart="onRowDragStart(event)" ' +
+      'ondragover="onRowDragOver(event)" ' +
+      'ondrop="onRowDrop(event)" ' +
+      'data-gidx="' + dataIndex + '">' +
       '<td>' + (globalIdx + 1) + '</td>' +
       '<td class="date-compact">' + formatDate(group.date) + '</td>' +
       '<td><div class="employee-group">' + employeeTags + '</div></td>' +
@@ -4151,3 +4185,65 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+window.onRowDragStart = function(e) {
+    e.dataTransfer.setData('text/plain', e.target.closest('tr').dataset.gidx);
+    e.target.closest('tr').classList.add('dragging');
+};
+
+window.onRowDragOver = function(e) {
+    e.preventDefault();
+};
+
+// 3 HÀM KÉO THẢ
+window.onRowDrop = function(e) {
+    e.preventDefault();
+    var fromGidx = e.dataTransfer.getData('text/plain');
+    var toTr = e.target.closest('tr');
+    if (!toTr) return;
+    var toGidx = toTr.dataset.gidx;
+    
+    if (fromGidx === toGidx) return;
+    
+    var fromKey = _tableGroupMap[fromGidx];
+    var toKey = _tableGroupMap[toGidx];
+    
+    // Hoán đổi vị trí 2 nhóm
+    var allRecords = L(REC_KEY, []);
+    
+    // Tìm records của 2 nhóm
+    var partsFrom = fromKey.split('|');
+    var partsTo = toKey.split('|');
+    
+    var fromDate = partsFrom[0], fromShift = partsFrom[1], fromEat = partsFrom[2], fromNote = partsFrom[3] === '-' ? '' : partsFrom[3];
+    var toDate = partsTo[0], toShift = partsTo[1], toEat = partsTo[2], toNote = partsTo[3] === '-' ? '' : partsTo[3];
+    var fromTasks = []; try { fromTasks = JSON.parse(partsFrom[4]); } catch(e) {}
+    var toTasks = []; try { toTasks = JSON.parse(partsTo[4]); } catch(e) {}
+    
+    // Lấy records của nhóm FROM
+    var fromRecords = allRecords.filter(function(r) {
+        return r.date === fromDate && r.shift === fromShift && r.eat === fromEat && 
+               (r.note || '') === fromNote && JSON.stringify(r.tasks || []) === JSON.stringify(fromTasks);
+    });
+    
+    // Xóa nhóm FROM khỏi mảng
+    allRecords = allRecords.filter(function(r) {
+        return !(r.date === fromDate && r.shift === fromShift && r.eat === fromEat && 
+               (r.note || '') === fromNote && JSON.stringify(r.tasks || []) === JSON.stringify(fromTasks));
+    });
+    
+    // Tìm vị trí nhóm TO trong mảng mới
+    var insertIdx = allRecords.findIndex(function(r) {
+        return r.date === toDate && r.shift === toShift && r.eat === toEat && 
+               (r.note || '') === toNote && JSON.stringify(r.tasks || []) === JSON.stringify(toTasks);
+    });
+    
+    if (insertIdx === -1) return;
+    
+    // Chèn nhóm FROM vào vị trí nhóm TO
+    allRecords.splice.apply(allRecords, [insertIdx, 0].concat(fromRecords));
+    
+    S(REC_KEY, allRecords);
+    window._statsData = allRecords;
+    renderStatsTable(allRecords);
+};

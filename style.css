@@ -1950,3 +1950,83 @@ select:focus {
     opacity: 0.4;
     border: 2px dashed #3b82f6;
 }
+#pieChart {
+    max-height: none !important;
+    overflow: visible !important;
+    width: 100% !important;
+}
+#pieChart > div {
+    width: 100% !important;
+}
+
+#pieChart .stat-dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.task-list-compact {
+    white-space: nowrap !important;
+    min-width: 180px !important;
+    max-width: none !important;
+    width: auto !important;
+}
+
+.stats-table-compact {
+    table-layout: auto !important;
+}
+
+.stats-table-compact td {
+    white-space: nowrap;
+}
+
+/* CSS đẹp cho tag nhân viên */
+.selected-employee-item {
+    background: linear-gradient(135deg, #e0f2fe, #dbeafe) !important;
+    border: 1px solid #93c5fd !important;
+    border-radius: 12px !important;
+    padding: 8px 12px !important;
+    margin-bottom: 6px !important;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15) !important;
+    transition: all 0.2s ease !important;
+}
+
+.selected-employee-item:hover {
+    background: linear-gradient(135deg, #dbeafe, #c7d2fe) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+    transform: translateY(-1px);
+}
+
+.selected-employee-item span {
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.selected-employee-item {
+    background: linear-gradient(135deg, #9fecf1, #dbf1a9) !important;
+    border: 1px solid #f72205 !important;
+    border-radius: 14px !important;
+    padding: 8px 12px !important;
+    margin-bottom: 6px !important;
+    box-shadow: 0 4px 12px rgba(163, 12, 37, 0.15) !important;
+    transition: all 0.2s ease !important;
+}
+
+.selected-employee-item:hover {
+    background: linear-gradient(135deg, #e68609, #9de726) !important;
+    box-shadow: 0 6px 16px rgba(244, 63, 94, 0.25) !important;
+    transform: translateY(-1px);
+}
+
+.selected-employee-item span {
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 500;          /* Độ đậm: 300 nhẹ, 400 thường, 600 đậm */
+    color: #031cfa;          /* Màu chữ tên */
+    letter-spacing: 0.3px;     /* Khoảng cách chữ */
+    font-size: 14px;           /* Cỡ chữ */
+}
+
+tr.dragging {
+    opacity: 0.4;
+    background: #e0f2fe;
+}
