@@ -639,7 +639,12 @@ function addSelectedEmployee(empName) {
   
   // 👉 THÊM: Lấy vị trí muốn chèn
   var posInput = document.getElementById('insertPosition');
-  var pos = posInput ? parseInt(posInput.value) : 0;
+  var posInput = document.getElementById('insertPosition');
+  var pos = 0;
+  if (posInput && posInput.value) {
+      pos = parseInt(posInput.value);
+  }
+  if (isNaN(pos)) pos = 0;
   
   if (pos && pos > 0 && pos <= selectedEmployees.length + 1) {
     // Chèn vào vị trí mong muốn
