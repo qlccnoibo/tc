@@ -1982,13 +1982,17 @@ select:focus {
 
 /* CSS đẹp cho tag nhân viên */
 .selected-employee-item {
-    background: linear-gradient(135deg, #e0f2fe, #dbeafe) !important;
-    border: 1px solid #93c5fd !important;
-    border-radius: 12px !important;
-    padding: 8px 12px !important;
-    margin-bottom: 6px !important;
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15) !important;
-    transition: all 0.2s ease !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px !important;
+    margin-bottom: 4px !important;
+    margin-right: 4px;
+    font-size: 12px !important;
+    border-radius: 20px !important;
+    background: linear-gradient(135deg, #fff1f2, #ffe4e6) !important;
+    border: 1px solid #fecdd3 !important;
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.12) !important;
 }
 
 .selected-employee-item:hover {
@@ -2003,12 +2007,17 @@ select:focus {
 }
 
 .selected-employee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 4px;
+  font-size: 12px !important;
     background: linear-gradient(135deg, #9fecf1, #dbf1a9) !important;
     border: 1px solid #f72205 !important;
-    border-radius: 14px !important;
-    padding: 8px 12px !important;
-    margin-bottom: 6px !important;
-    box-shadow: 0 4px 12px rgba(163, 12, 37, 0.15) !important;
+    border-radius: 8px !important;
+    padding: 4px 6px !important;
+    margin-bottom: 4px !important;
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.12) !important;
     transition: all 0.2s ease !important;
 }
 
@@ -2018,12 +2027,13 @@ select:focus {
     transform: translateY(-1px);
 }
 
+  /* Điều chỉnh chữ khi chọn tên xong ở dòng dưới */
 .selected-employee-item span {
     font-family: 'Segoe UI', 'Roboto', sans-serif;
     font-weight: 500;          /* Độ đậm: 300 nhẹ, 400 thường, 600 đậm */
     color: #031cfa;          /* Màu chữ tên */
     letter-spacing: 0.3px;     /* Khoảng cách chữ */
-    font-size: 14px;           /* Cỡ chữ */
+    font-size: 13px;           /* Cỡ chữ */
 }
 
 tr.dragging {

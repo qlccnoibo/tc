@@ -690,7 +690,7 @@ function renderSelectedEmployees() {
                 'ondrop="onDrop(event)" ' +
                 'style="display:flex; align-items:center; gap:6px; padding:6px 10px; background:#f8fafc; border-radius:8px; margin-bottom:6px; border:1px solid #e5e7eb;">';
         html += '<span style="flex:1; display:flex; align-items:center;">' + 
-        '<span style="display:inline-block; width:22px; height:22px; line-height:22px; text-align:center; background:#2563eb; color:white; border-radius:50%; font-size:11px; font-weight:600; margin-right:8px; flex-shrink:0;">' + (idx + 1) + '</span>' + 
+        '<span style="display:inline-block; width:18px; height:18px; line-height:18px; text-align:center; background:#2563eb; color:white; border-radius:50%; font-size:11px; font-weight:600; margin-right:8px; flex-shrink:0;">' + (idx + 1) + '</span>' + 
         cleanEmployeeName(empName) + 
         '</span>';
         html += '<span style="cursor:pointer;font-weight:700;color:#dc2626;font-size:14px;" onclick="removeSelectedEmployee(\'' + empName.replace(/'/g, "\\'") + '\')">✕</span>';
