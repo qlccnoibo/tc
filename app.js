@@ -651,6 +651,13 @@ function removeSelectedEmployee(empName) {
   renderSelectedEmployees();
 }
 
+window.removeSelectedEmployee = function(empName) {
+    selectedEmployees = selectedEmployees.filter(function(e) { 
+        return e !== empName; 
+    });
+    renderSelectedEmployees();
+};
+
 function renderSelectedEmployees() {
     var container = document.getElementById('selectedEmployees');
     if (!container) return;
@@ -667,7 +674,7 @@ function renderSelectedEmployees() {
         '<span style="display:inline-block; width:22px; height:22px; line-height:22px; text-align:center; background:#2563eb; color:white; border-radius:50%; font-size:11px; font-weight:600; margin-right:8px; flex-shrink:0;">' + (idx + 1) + '</span>' + 
         cleanEmployeeName(empName) + 
         '</span>';
-        html += '<span style="cursor:pointer;font-weight:700;color:#dc2626;font-size:14px;">✕</span>';
+        html += '<span style="cursor:pointer;font-weight:700;color:#dc2626;font-size:14px;" onclick="removeSelectedEmployee(\'' + empName.replace(/'/g, "\\'") + '\')">✕</span>';
         html += '</div>';
     });
     
