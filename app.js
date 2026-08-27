@@ -636,7 +636,22 @@ function addSelectedEmployee(empName) {
     showAlert('Nhân viên "' + empName + '" đã được chọn!');
     return;
   }
-  selectedEmployees.push(empName);
+  
+  // 👉 THÊM: Lấy vị trí muốn chèn
+  var posInput = document.getElementById('insertPosition');
+  var pos = posInput ? parseInt(posInput.value) : 0;
+  
+  if (pos && pos > 0 && pos <= selectedEmployees.length + 1) {
+    // Chèn vào vị trí mong muốn
+    selectedEmployees.splice(pos - 1, 0, empName);
+  } else {
+    // Thêm vào cuối
+    selectedEmployees.push(empName);
+  }
+  
+  // 👉 Xóa ô vị trí sau khi dùng
+  if (posInput) posInput.value = '';
+  
   renderSelectedEmployees();
   var empInput = document.getElementById('employeeInput');
   if (empInput) { empInput.value = '';
@@ -645,7 +660,6 @@ function addSelectedEmployee(empName) {
   if (empAutocomplete) { empAutocomplete.innerHTML = '';
     empAutocomplete.style.display = 'none'; }
 }
-
 function removeSelectedEmployee(empName) {
   selectedEmployees = selectedEmployees.filter(function(n) { return n !== empName; });
   renderSelectedEmployees();
@@ -3088,7 +3102,19 @@ function renderModalContent() {
 
 window.addEmployeeToModal = function(empName) {
   if (_editModalData.employees.includes(empName)) return;
-  _editModalData.employees.push(empName);
+  
+  // Lấy vị trí muốn chèn
+  var posInput = document.getElementById('modalInsertPosition');
+  var pos = posInput ? parseInt(posInput.value) : 0;
+  
+  if (pos && pos > 0 && pos <= _editModalData.employees.length + 1) {
+    _editModalData.employees.splice(pos - 1, 0, empName);
+  } else {
+    _editModalData.employees.push(empName);
+  }
+  
+  if (posInput) posInput.value = '';
+  
   renderModalContent();
   document.getElementById('modalEmpInput').value = '';
   document.getElementById('modalEmpAutocomplete').style.display = 'none';

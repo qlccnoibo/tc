@@ -46,6 +46,7 @@
         <label>👤 Nhân viên <span class="muted" id="selectedCount">(0 đã chọn)</span></label>
         <div class="autocomplete-wrapper">
           <input type="text" id="employeeInput" placeholder="Nhập tên để tìm kiếm và chọn..." autocomplete="off" />
+          <input type="number" id="insertPosition" placeholder="Vị trí (trống = cuối)" min="1" style="width:150px; padding:8px; border:2px solid #d1d5db; border-radius:6px;" />
           <div id="empAutocomplete" class="autocomplete-list"></div>
         </div>
         <div class="selected-employees" id="selectedEmployees"></div>
@@ -207,6 +208,7 @@
           <div class="modal-label">👥 Nhân viên</div>
           <div class="autocomplete-wrapper">
             <input type="text" id="modalEmpInput" placeholder="Nhập tên để thêm nhân viên..." autocomplete="off" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;" />
+            <input type="number" id="modalInsertPosition" placeholder="Vị trí" min="1" style="width:80px; padding:10px; border:1px solid #e5e7eb; border-radius:8px;" />
             <div id="modalEmpAutocomplete" class="autocomplete-list"></div>
           </div>
           <div class="modal-emp-tags" id="modalEmpTags"></div>
