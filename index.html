@@ -1,479 +1,262 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Chi Tiêu Cá Nhân</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="utf-8" />
+  <title>Hệ thống chấm công & quản lý</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- App Container -->
-    <div class="app-container">
-        
-        <!-- Sidebar Navigation -->
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-wallet"></i>
-                    <span>ExpenseTracker</span>
-                </div>
-                <button class="close-sidebar" onclick="toggleSidebar()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item active" data-page="dashboard">
-                    <i class="fas fa-home"></i>
-                    <span>Tổng quan</span>
-                </li>
-                <li class="nav-item" data-page="transactions">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Giao dịch</span>
-                </li>
-                <li class="nav-item" data-page="budget">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Ngân sách</span>
-                </li>
-                <li class="nav-item" data-page="statistics">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Thống kê</span>
-            </li>
-                <li class="nav-item" data-page="reports">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Báo cáo</span>
-                </li>
-                <li class="nav-item" data-page="goals">
-                    <i class="fas fa-bullseye"></i>
-                    <span>Mục tiêu</span>
-                </li>
-                <li class="nav-item" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    <span>Cài đặt</span>
-                </li>
-            </ul>
-            
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="avatar">BP</div>
-                    <div>
-                        <p class="user-name">Bình Phùng</p>
-                        <p class="user-email">binhpv.4078@gemail.com</p>
-                    </div>
-                </div>
-            </div>
-        </nav>
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Top Header -->
-<header class="top-header">
-    <div class="header-center">
-        <button class="menu-toggle" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="header-title-wrapper">
-            <h1 class="header-title"><i class="fas fa-file-invoice-dollar"></i> Hệ thống quản lý tài chính cá nhân</h1>
+  <div class="header">
+    <h1 style="margin-bottom: 4px;">📋 Hệ thống quản lý & chấm công</h1>
+    <p style="font-style: italic; font-size: 12px; color: #fafafa; margin: 0; text-align: right;">
+        Version 2.0 - Copyright by Binh Kca</p>
+    <div id="liveClock" style="text-align:left; font-size:14px; color:#f7b206; font-weight:500; margin-top:2px; letter-spacing:0px;"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <button id="tabChamCong" class="active admin-only" type="button">🕒 Chấm công</button>
+    <button id="tabThongKe" type="button">📊 Thống kê</button>
+    <button id="tabCaNhan" type="button">👤 Cá nhân</button>
+    <button id="tabQuanLy" class="admin-only" type="button">⚙️ Quản lý</button>
+    <button class="admin-only" onclick="uploadToGithub()" 
+        style="padding:8px 14px; background:#3b82f6; color:white; border:none; border-radius:8px; font-size:13px; cursor:pointer; white-space:nowrap;">
+        📤 Upload lên Github
+    </button>
+    <button id="adminLoginBtn" onclick="toggleAdmin()" 
+            style="margin-left:auto; padding:8px 14px; 
+                   background:#64748b; color:white; border:none; border-radius:8px; 
+                   font-size:13px; cursor:pointer; white-space:nowrap;">
+        🔐 Đăng nhập
+    </button>
+  </nav>
+
+  <main class="container">
+    <!-- Page: Chấm công -->
+    <section id="pageChamCong" class="card">
+      <h2>🕒 Chấm công</h2>
+      <form id="attendanceForm" autocomplete="off">
+        <label>👤 Nhân viên <span class="muted" id="selectedCount">(0 đã chọn)</span></label>
+        <div class="autocomplete-wrapper">
+          <input type="text" id="employeeInput" placeholder="Nhập tên để tìm kiếm và chọn..." autocomplete="off" />
+          <div id="empAutocomplete" class="autocomplete-list"></div>
         </div>
-    </div>
-    <div class="header-right">
-        <button class="notification-btn">
-            <i class="fas fa-bell"></i>
-            <span class="badge">3</span>
-        </button>
-        <button class="add-transaction-btn" onclick="openModal('transaction-modal')">
-            <i class="fas fa-plus"></i>
-            <span>Thêm giao dịch</span>
-        </button>
-    </div>
-</header>
-            
-            <!-- Page Content -->
-            <div class="page-content">
-                
-                <!-- Dashboard Page -->
-                <div class="page active" id="dashboard-page">
-                    <!-- Summary Cards -->
-                    <div class="summary-cards">
-                        <div class="card balance-card">
-                            <div class="card-icon">
-                                <i class="fas fa-coins"></i>
-                            </div>
-                            <div class="card-info">
-                                <p class="card-label">Số dư hiện tại</p>
-                                <h3 class="card-value">0đ</h3>
-                                <p class="card-change positive">+2.5% so với tháng trước</p>
-                            </div>
-                        </div>
-                        
-                        <div class="card income-card">
-                            <div class="card-icon">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-                            <div class="card-info">
-                                <p class="card-label">Thu nhập tháng này</p>
-                                <h3 class="card-value">0đ</h3>
-                                <p class="card-change">10 giao dịch</p>
-                            </div>
-                        </div>
-                        
-                        <div class="card expense-card">
-                            <div class="card-icon">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                            <div class="card-info">
-                                <p class="card-label">Chi tiêu tháng này</p>
-                                <h3 class="card-value">0đ</h3>
-                                <p class="card-change negative">-15% so với tháng trước</p>
-                            </div>
-                        </div>
-                        
-                        <div class="card savings-card">
-                            <div class="card-icon">
-                                <i class="fas fa-piggy-bank"></i>
-                            </div>
-                            <div class="card-info">
-                                <p class="card-label">Tiết kiệm</p>
-                                <h3 class="card-value">0đ</h3>
-                                <p class="card-change">Đạt 40% mục tiêu</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Charts Row -->
-                    <div class="charts-row">
-                        <div class="chart-card">
-                            <h3>Chi tiêu theo danh mục</h3>
-                            <canvas id="categoryChart"></canvas>
-                        </div>
-                        <div class="chart-card">
-                            <h3>Xu hướng 6 tháng</h3>
-                            <canvas id="trendChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Transactions -->
-                    <div class="recent-transactions">
-                        <div class="section-header">
-                            <h3>Giao dịch gần đây</h3>
-                            <button class="see-all-btn" onclick="switchPage('transactions')">
-                                Xem tất cả <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                        <div class="transaction-list" id="recent-transactions">
-                            <!-- Transactions will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Transactions Page -->
-                <div class="page" id="transactions-page">
-                    <div class="filters-bar">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" placeholder="Tìm kiếm giao dịch...">
-                        </div>
-                        <select class="filter-select">
-                            <option value="all">Tất cả loại</option>
-                            <option value="income">Thu nhập</option>
-                            <option value="expense">Chi tiêu</option>
-                        </select>
-                        <select class="filter-select">
-                            <option value="all">Tất cả danh mục</option>
-                            <option value="food">Ăn uống</option>
-                            <option value="transport">Di chuyển</option>
-                            <option value="shopping">Mua sắm</option>
-                            <option value="bills">Hóa đơn</option>
-                            <option value="entertainment">Giải trí</option>
-                        </select>
-                        <input type="date" class="date-filter">
-                    </div>
-                    
-                    <div class="transaction-list full-list" id="all-transactions">
-                        <!-- All transactions rendered here -->
-                    </div>
-                </div>
-                
-                <!-- Budget Page -->
-                <div class="page" id="budget-page">
-                    <div class="budget-overview">
-                        <h3>Ngân sách tháng này</h3>
-                        <div class="budget-total">
-                            <p>Tổng ngân sách: <strong>0đ</strong></p>
-                            <p>Đã chi tiêu: <strong>0đ</strong></p>
-                            <p>Còn lại: <strong class="text-success">0đ</strong></p>
-                        </div>
-                    </div>
-                    
-                    <div class="budget-categories">
-                        <div class="budget-item">
-                            <div class="budget-info">
-                                <span class="category-icon">🍜</span>
-                                <div>
-                                    <p class="budget-name">Ăn uống</p>
-                                    <p class="budget-amount">3,000,000đ / 5,000,000đ</p>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 60%"></div>
-                            </div>
-                            <p class="budget-percentage">60%</p>
-                        </div>
-                        
-                        <div class="budget-item">
-                            <div class="budget-info">
-                                <span class="category-icon">🚗</span>
-                                <div>
-                                    <p class="budget-name">Di chuyển</p>
-                                    <p class="budget-amount">500,000đ / 1,000,000đ</p>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress warning" style="width: 50%"></div>
-                            </div>
-                            <p class="budget-percentage">50%</p>
-                        </div>
-                        
-                        <div class="budget-item">
-                            <div class="budget-info">
-                                <span class="category-icon">🛍️</span>
-                                <div>
-                                    <p class="budget-name">Mua sắm</p>
-                                    <p class="budget-amount">800,000đ / 2,000,000đ</p>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress danger" style="width: 40%"></div>
-                            </div>
-                            <p class="budget-percentage">40%</p>
-                        </div>
-                        
-                        <button class="add-budget-btn" onclick="alert('Chức năng đang phát triển')">
-                            <i class="fas fa-plus"></i> Thêm ngân sách mới
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Reports Page -->
-                <div class="page" id="reports-page">
-                    <div class="report-controls">
-                        <select class="filter-select">
-                            <option value="month">Theo tháng</option>
-                            <option value="quarter">Theo quý</option>
-                            <option value="year">Theo năm</option>
-                        </select>
-                        <button class="export-btn" onclick="alert('Xuất báo cáo PDF')">
-                            <i class="fas fa-download"></i> Xuất PDF
-                        </button>
-                    </div>
-                    
-                    <div class="report-charts">
-                        <div class="chart-card large">
-                            <h3>So sánh thu nhập và chi tiêu</h3>
-                            <canvas id="comparisonChart"></canvas>
-                        </div>
-                        
-                        <div class="chart-card">
-                            <h3>Top 5 khoản chi tiêu</h3>
-                            <div class="top-expenses">
-                                <div class="expense-item">
-                                    <span>1. Tiền nhà</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>2. Đi chợ</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>3. Xăng xe</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>4. Ăn ngoài</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>5. Cà phê</span>
-                                    <strong>0đ</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Goals Page -->
-                <div class="page" id="goals-page">
-                    <div class="goals-grid">
-                        <div class="goal-card">
-                            <div class="goal-header">
-                                <span class="goal-icon">🚗</span>
-                                <div>
-                                    <h4>Mua xe máy</h4>
-                                    <p class="goal-deadline">Hạn: 12/2026</p>
-                                </div>
-                            </div>
-                            <div class="goal-progress">
-                                <p>Tích lũy: <strong>15,000,000đ</strong> / 50,000,000đ</p>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 30%"></div>
-                                </div>
-                                <p class="goal-percentage">30% hoàn thành</p>
-                            </div>
-                        </div>
-                        
-                        <div class="goal-card">
-                            <div class="goal-header">
-                                <span class="goal-icon">✈️</span>
-                                <div>
-                                    <h4>Du lịch Đà Nẵng</h4>
-                                    <p class="goal-deadline">Hạn: 06/2026</p>
-                                </div>
-                            </div>
-                            <div class="goal-progress">
-                                <p>Tích lũy: <strong>5,000,000đ</strong> / 10,000,000đ</p>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 50%"></div>
-                                </div>
-                                <p class="goal-percentage">50% hoàn thành</p>
-                            </div>
-                        </div>
-                        
-                        <div class="goal-card add-goal">
-                            <button onclick="alert('Thêm mục tiêu mới')">
-                                <i class="fas fa-plus"></i>
-                                <span>Thêm mục tiêu mới</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Settings Page -->
-                <div class="page" id="settings-page">
-                    <div class="settings-section">
-                        <h3>Thông tin cá nhân</h3>
-                        <div class="settings-form">
-                            <label>Tên người dùng</label>
-                            <input type="text" value="Người dùng" class="settings-input">
-                            
-                            <label>Email</label>
-                            <input type="email" value="user@email.com" class="settings-input">
-                            
-                            <label>Số điện thoại</label>
-                            <input type="tel" placeholder="Nhập số điện thoại" class="settings-input">
-                        </div>
-                    </div>
-                    
-                    <div class="settings-section">
-                        <h3>Tùy chọn</h3>
-                        <div class="settings-option">
-                            <div>
-                                <p class="option-title">Thông báo</p>
-                                <p class="option-desc">Nhận thông báo khi vượt ngân sách</p>
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="settings-option">
-                            <div>
-                                <p class="option-title">Đồng bộ tự động</p>
-                                <p class="option-desc">Tự động đồng bộ dữ liệu lên cloud</p>
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="settings-option">
-                            <div>
-                                <p class="option-title">Chế độ tối</p>
-                                <p class="option-desc">Sử dụng giao diện tối</p>
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="settings-section">
-                        <h3>Dữ liệu</h3>
-                        <button class="danger-btn" onclick="alert('Xuất dữ liệu')">
-                            <i class="fas fa-download"></i> Xuất dữ liệu
-                        </button>
-                        <button class="danger-btn" onclick="alert('Xóa tất cả dữ liệu')">
-                            <i class="fas fa-trash"></i> Xóa tất cả dữ liệu
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <!-- Transaction Modal -->
-    <div class="modal" id="transaction-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Thêm giao dịch mới</h3>
-                <button class="close-modal" onclick="closeModal('transaction-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="type-selector">
-                    <button class="type-btn active" data-type="expense" onclick="selectType('expense')">
-                        Chi tiêu
-                    </button>
-                    <button class="type-btn" data-type="income" onclick="selectType('income')">
-                        Thu nhập
-                    </button>
-                </div>
-                
-                <div class="form-group">
-                    <label>Số tiền</label>
-                    <input type="number" class="form-input" placeholder="0đ" id="amount-input">
-                </div>
-                
-                <div class="form-group">
-                    <label>Danh mục</label>
-                    <select class="form-input" id="category-select">
-                        <option value="food">🍜 Ăn uống</option>
-                        <option value="transport">🚗 Di chuyển</option>
-                        <option value="shopping">🛍️ Mua sắm</option>
-                        <option value="bills">📄 Hóa đơn</option>
-                        <option value="entertainment">🎮 Giải trí</option>
-                        <option value="health">💊 Y tế</option>
-                        <option value="education">📚 Giáo dục</option>
-                        <option value="other">📦 Khác</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Ghi chú</label>
-                    <textarea class="form-input" rows="3" placeholder="Thêm ghi chú..." id="note-input"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Ngày giao dịch</label>
-                    <input type="date" class="form-input" id="date-input">
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="cancel-btn" onclick="closeModal('transaction-modal')">Hủy</button>
-                <button class="save-btn" onclick="saveTransaction()">Lưu giao dịch</button>
-            </div>
+        <div class="selected-employees" id="selectedEmployees"></div>
+        <div class="selected-hint" id="selectedHint">👆 Gõ tên và chọn từ danh sách gợi ý để thêm nhân viên</div>
+        <div class="row"><div class="col"><label>📅 Ngày</label><input type="date" id="attDate" /></div></div>
+        <label style="margin-top:8px">🕐 Ca làm việc</label>
+        <div id="shiftGrid" class="shift-grid"></div>
+        <label style="margin-top:10px">🍚 Ăn cơm</label>
+        <div style="display:flex;gap:16px;margin-top:4px">
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="radio" name="eat" value="Có" checked> Có</label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="radio" name="eat" value="Không"> Không</label>
         </div>
+        <label style="margin-top:10px">📋 Công việc</label>
+        <div id="groupsCompact" class="groups-compact"></div>
+        <label style="margin-top:10px">📝 Ghi chú <span class="muted">(không bắt buộc)</span></label>
+        <div class="note-input-wrapper">
+          <textarea id="attNote" class="note-input" placeholder="Nhập ghi chú nếu cần..." maxlength="500"></textarea>
+          <span class="note-char-count" id="noteCharCount">0/500</span>
+        </div>
+        <div class="controls">
+          <button class="btn btn-primary" type="submit">✅ Lưu</button>
+          <button class="btn" type="button" id="clearForm">🔄 Làm mới</button>
+          <button class="btn admin-only" type="button" onclick="searchRecords()">🔍 Tìm/Sửa</button>
+        </div>
+        <!-- Missing employees section -->
+        <div class="missing-emp-section open" id="missingEmpSection">
+          <div class="missing-emp-header" onclick="toggleMissingEmp()">
+            <div class="missing-emp-title">
+              <span>⚠️</span> Nhân viên chưa chấm công tháng này
+              <span class="missing-emp-count" id="missingEmpCount">0</span>
+            </div>
+            <span class="missing-emp-toggle" id="missingEmpToggle">▼</span>
+          </div>
+          <div class="missing-emp-body" id="missingEmpBody">
+            <div class="missing-emp-list" id="missingEmpList"></div>
+            <div class="missing-emp-actions">
+              <button class="btn btn-xs" onclick="refreshMissingEmp()">🔄 Làm mới</button>
+              <button class="btn btn-xs btn-primary" onclick="addAllMissingEmp()">✅ Thêm tất cả</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Page: Thống kê -->
+    <section id="pageThongKe" class="card" style="display:none">
+      <h2>📊 Thống kê chấm công</h2>
+      <div id="statsContent"></div>
+    </section>
+
+    <!-- Page: Cá nhân -->
+    <section id="pageCaNhan" class="card" style="display:none">
+      <h2>👤 Thông tin cá nhân</h2>
+      <div id="personalContent" class="personal-content-wrapper"></div>
+    </section>
+
+    <!-- Page: Quản lý -->
+    <section id="pageQuanLy" class="card" style="display:none">
+      <h2>⚙️ Quản lý</h2>
+      <div class="manage-layout">
+        <div>
+          <h3>📋 Nhóm công việc <span class="muted" id="groupCount">0 nhóm</span></h3>
+          <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+            <input id="newGroupName" type="text" placeholder="Tên nhóm..." style="flex:1" />
+            <input id="newGroupColor" type="color" value="#d1d5db" style="width:38px;height:38px;padding:2px;border:1px solid #d1d5db;border-radius:6px;cursor:pointer" />
+            <button class="btn btn-primary btn-sm" id="addGroupBtn">+ Thêm</button>
+          </div>
+          <div class="groups-frames" id="groupsWrap"></div>
+          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-sm" id="exportGroups">📥 Xuất nhóm</button>
+            <input id="importGroups" type="file" accept=".json" style="display:none" />
+            <button class="btn btn-sm" id="importGroupsBtn">📤 Nhập nhóm</button>
+            <button class="btn btn-sm btn-danger" id="resetGroups">🔄 Reset nhóm</button>
+            <button class="btn btn-sm" onclick="backupAllData()">💾 Backup</button>
+            <button class="btn btn-sm" onclick="restoreAllData()">📂 Restore</button>
+          </div>
+        </div>
+        <aside class="side-panel">
+          <!-- Employee management -->
+          <div class="panel">
+            <h3>👥 Nhân viên</h3>
+            <div style="display:flex;gap:6px">
+              <input id="empName" type="text" placeholder="Tên nhân viên..." style="flex:1" />
+              <button class="btn btn-primary btn-sm" id="addEmpBtn">+ Thêm</button>
+            </div>
+            <div style="margin-top:8px">
+              <input id="importEmpFile" type="file" accept=".csv,.txt" style="display:none" />
+              <div id="uploadArea" class="upload-area" onclick="document.getElementById('importEmpFile').click()">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Nhấn để chọn file CSV</div>
+                <div class="upload-hint">Lưu file Excel thành CSV trước khi import</div>
+              </div>
+              <div id="fileInfo" class="file-info" style="display:none">
+                <span>📄</span><span class="file-name" id="fileName"></span>
+                <span class="file-remove" onclick="removeFile()">✕</span>
+              </div>
+              <div id="importProgress" class="import-progress">⏳ Đang đọc...</div>
+            </div>
+            <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-sm btn-primary" id="importEmpBtn" disabled>📥 Import</button>
+              <button class="btn btn-sm btn-danger" id="clearAllEmp">🗑 Xóa hết</button>
+              <span class="muted" id="empCount">0 NV</span>
+            </div>
+            <div style="margin-top:6px;">
+              <button class="btn btn-sm" onclick="checkSyncStatus()" title="Kiểm tra trạng thái đồng bộ dữ liệu ẩn" style="background:#10b981;color:white;border:none;width:100%;">
+                🔄 Kiểm tra đồng bộ
+              </button>
+            </div>
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-sm" onclick="setGithubToken()" style="flex:1;background:#3b82f6;color:white;border:none;min-width:120px;">🔐 Nhập token</button>
+              <button class="btn btn-sm" onclick="checkGithubTokenStatus()" style="flex:1;background:#8b5cf6;color:white;border:none;min-width:120px;">📊 Trạng thái</button>
+              <button class="btn btn-sm" onclick="clearGithubToken()" style="flex:1;background:#ef4444;color:white;border:none;min-width:120px;">🗑 Xóa token</button>
+            </div>
+            <div class="list" id="empList" style="margin-top:6px"></div>
+          </div>
+          <!-- Shift management -->
+          <div class="panel">
+            <h3>🕐 Ca làm việc</h3>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <input id="shiftName" type="text" placeholder="Tên ca" style="flex:1" />
+              <input id="shiftTime" type="text" placeholder="Giờ" style="width:100px" />
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <input id="shiftIcon" type="text" placeholder="Icon" style="width:50px" value="🔹" />
+              <button class="btn btn-primary btn-sm" id="addShiftBtn" style="flex:1">+ Thêm</button>
+            </div>
+            <div class="list" id="shiftList" style="margin-top:6px"></div>
+          </div>
+          <!-- Audit log -->
+          <div class="panel">
+            <h3>📝 Nhật ký</h3>
+            <div class="audit" id="auditLog"></div>
+            <button class="btn btn-sm btn-danger" id="clearAudit" style="margin-top:6px;width:100%">🗑 Xóa log</button>
+          </div>
+        </aside>
+      </div>
+      <div id="backupSection" style="display:none; margin-top:20px; padding:16px; background:#f8fafc; border-radius:12px; border:1px solid #e5e7eb;">
+        <h4 style="margin:0 0 12px 0;">💾 Sao lưu & Phục hồi</h4>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="backupAllData()" style="background:#10b981; color:white; border:none; padding:10px 16px;">💾 Sao lưu dữ liệu</button>
+          <button class="btn btn-sm" onclick="restoreAllData()" style="background:#f59e0b; color:white; border:none; padding:10px 16px;">📥 Phục hồi dữ liệu</button>
+          <button class="btn btn-sm" onclick="uploadToGithub()" style="background:#3b82f6; color:white; border:none; padding:10px 16px;">📤 Upload lên GitHub</button>
+        </div>
+        <p style="font-size:12px; color:#64748b; margin-top:8px;">
+          💡 Sao lưu: Tải file JSON về máy | Phục hồi: Chọn file JSON để khôi phục | Upload: Đưa dữ liệu lên GitHub cho nhân viên
+        </p>
+      </div>
+    </section>
+
+    <!-- Edit Group Modal -->
+    <div id="editGroupModal" class="edit-modal-backdrop">
+      <div class="edit-modal">
+        <h3>✏️ Sửa nhóm chấm công</h3>
+        <div class="modal-body">
+          <label style="font-weight:500; margin-bottom:4px; display:block;">📅 Ngày chấm công</label>
+          <input type="date" id="modalDate" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; margin-bottom:12px;" />
+        </div>
+        <div class="modal-section">
+          <div class="modal-label">👥 Nhân viên</div>
+          <div class="autocomplete-wrapper">
+            <input type="text" id="modalEmpInput" placeholder="Nhập tên để thêm nhân viên..." autocomplete="off" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;" />
+            <div id="modalEmpAutocomplete" class="autocomplete-list"></div>
+          </div>
+          <div class="modal-emp-tags" id="modalEmpTags"></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-label">🕐 Ca làm việc</div>
+          <div id="modalShiftGrid" class="shift-grid"></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-label">🍚 Ăn cơm</div>
+          <div style="display:flex;gap:16px;">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="modalEat" value="Có" checked /> ✅ Có
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="modalEat" value="Không" /> ❌ Không
+            </label>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-label">📋 Công việc</div>
+          <div id="modalGroupsCompact" class="groups-compact"></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-label">📝 Ghi chú</div>
+          <textarea id="modalNote" class="note-input" placeholder="Nhập ghi chú..." maxlength="500" style="width:100%;min-height:60px;"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn" onclick="closeEditModal()">❌ Hủy</button>
+          <button class="btn btn-danger" onclick="deleteGroupFromModal()">🗑 Xóa</button>
+          <button class="btn btn-primary" onclick="saveGroupFromModal()">💾 Lưu</button>
+        </div>
+      </div>
     </div>
-    
-    <script src="app.js"></script>
+  </main>
+
+  <!-- Dialog -->
+  <div id="__customDialogBackdrop" class="custom-dialog-backdrop">
+    <div class="custom-dialog">
+      <h4 id="__cdTitle"></h4>
+      <div class="body" id="__cdBody"></div>
+      <div id="__cdInputWrap" style="display:none"><input id="__cdInput" type="text" /></div>
+      <div class="controls" id="__cdControls"></div>
+    </div>
+  </div>
+
+  <!-- Note Popup -->
+  <div id="notePopup" class="note-popup"></div>
+
+  <!-- JavaScript -->
+  <script src="app.js"></script>
 </body>
 </html>
